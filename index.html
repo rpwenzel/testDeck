@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PML Project</title>
+  <title>DDP Project</title>
   <meta charset="utf-8">
-  <meta name="description" content="PML Project">
+  <meta name="description" content="DDP Project">
   <meta name="author" content="Bob Wenzel">
   <meta name="generator" content="slidify" />
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -35,8 +35,8 @@
     <!-- LOGO SLIDE -->
         <slide class="title-slide segue nobackground">
   <hgroup class="auto-fadein">
-    <h1>PML Project</h1>
-    <h2>Predicting a Participant's Exercise Manner</h2>
+    <h1>DDP Project</h1>
+    <h2>Summary of Clients' Stoplights</h2>
     <p>Bob Wenzel<br/></p>
   </hgroup>
   <article></article>  
@@ -44,60 +44,75 @@
     
 
     <!-- SLIDES -->
-    <slide class="" id="slide-1" style="background:;">
+    <slide class="" id="summary" style="background:;">
   <hgroup>
-    <h2>Predicting a Participant&#39;s Exercise Manner</h2>
+    <h2>Summary of Clients&#39; Stoplights</h2>
   </hgroup>
   <article data-timings="">
-    <h3>Introduction</h3>
-
-<p>&quot;Human Activity Recognition - HAR has emerged as a key research area in the last years and is gaining increasing attention by the pervasive computing research community&quot; [1].   The task at hand, using their data from their research in &quot;Weight Lifting Exercises&quot; is to predict the manner in which a participant did their exercises.  The manner performed can be one of 5 Classes:</p>
+    <p>A client may have some or all of the following categories:</p>
 
 <ul>
-<li>(Class A) exactly to specification</li>
-<li>(Class B) throwing the elbows to the front</li>
-<li>(Class C) lifting the dumbbell only halfway</li>
-<li>(Class D) lowering the dumbbell only halfway</li>
-<li>(Class E) throwing the hips to the front.<br>
-(Class A) corresponds to the specified execution of the exercise and the other 4 classes are related to common mistakes.</li>
+<li>Alertattr, Categorycoverage, Catstat, Cmrattr, Cmrhealth, Doubleorders</li>
+<li>Extremeprofile, Feederror, Feedmissing, Imagecheck, Optoutaging, Orderconsolidation</li>
+<li>Orders, Promostaging, Sitevisits, Unrecproducts, Webattr, Wrdown</li>
 </ul>
+
+<p>Stoplights are from over 400 clients, and can be Red, Yellow or Green,
+They are created daily and depict the client&#39;s current status for each
+of their categories.</p>
+
+<p>&quot;Summary of Clients&#39; Spotlights&quot; is a Shiny Application which summarizes the data for 
+a date range specified by a user, giving the Total Records and percentage of each color.
+It can be launched from a Browser using the following URL:</p>
+
+<p><a href="https://bwenzel.shinyapps.io/shinyapps/">https://bwenzel.shinyapps.io/shinyapps/</a></p>
+
+<p>On the following slides are the R code and its results that produces a sample graph using a date range: 
+From: 2014-05-12  To: 2014-05-18</p>
 
   </article>
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-2" style="background:;">
+<slide class="" id="pie" style="background:;">
+  <hgroup>
+    <h2>A Pie Chart</h2>
+  </hgroup>
   <article data-timings="">
-    <p>Data for this project can be found at:</p>
-
-<ul>
-<li>For Trainning: <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv</a></li>
-<li>For Testing: <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv</a></li>
-</ul>
-
-<p>Using exploratory analysis and predictive techniques such as Random Forest, we will predict what manner a participant did based upon exploring the data we received.  Ideally the OOB will small, preferably less the 5%. </p>
-
-<h3>Methods - Data Collection</h3>
-
-<p>The training data set consisted of 19622 records with 160 variables, one of which specified the Class (classe). The testing data set consisted of 20 records with 160 variables without the variable Class which is the object of this project to predict.
-The data was downloaded from the Coursera Class &quot;Practical Machine Learning&quot; site[2] on 2014-06-14.</p>
+    <pre><code class="r">  require(ggplot2)
+  library(MASS);  library(ggm);  library(RCurl)
+  mainDir &lt;- &quot;c:/tmpDDP&quot;
+  if (!file.exists(mainDir)){ dir.create(file.path(mainDir))  }
+  download.file(&quot;https://raw.githubusercontent.com/bwenzel/DDP2/master/input.txt&quot;,
+  destfile = &quot;c:/tmpDDP/input.txt&quot;, method = &quot;curl&quot;)
+  data=read.delim(&#39;c:/tmpDDP/input.txt&#39;,sep=&quot;\t&quot;)
+  allstoplights=data.frame(data)
+  stoplights=subset(allstoplights,((as.Date(data$date) &gt; as.Date(&quot;2014-05-12&quot;)) &amp;
+  (as.Date(data$date) &lt; as.Date(&quot;2014-05-18&quot;))))
+  count=nrow(stoplights)
+  datacolor.freq=table(stoplights$color)
+  colors=c(&#39;green&#39;,&#39;red&#39;,&#39;yellow&#39;)
+  pie_labels &lt;- round(datacolor.freq/sum(datacolor.freq) * 100, 1)
+  pie_labels=paste(pie_labels,&quot;%&quot;,sep=&quot;&quot;)
+  main1=&quot;Summary of Clients&#39; Stoplights\nTotal Records=&quot;
+  main2=paste(main1,count)
+</code></pre>
 
   </article>
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="" id="slide-3" style="background:;">
+<slide class="" id="pie" style="background:;">
   <hgroup>
-    <h3>Exploratory Analysis</h3>
+    <h2>A Pie Chart Continued</h2>
   </hgroup>
   <article data-timings="">
-    <p>Examining the training raw data, many NA values were observed.  So two transformations were developed to remove the columns with the NA values.  </p>
+    <pre><code class="r">  require(ggplot2)
+  pie_pix=(pie(datacolor.freq,col=colors,main=main2,labels=pie_labels,cex=0.6))
+  legend(&quot;topleft&quot;, cex=0.7, c(&quot;Good = (green rec. count / total rec.)%&quot;,&quot;Bad = (red rec. count / total records)%&quot;,&quot;Caution = (yellow rec. count / total records)%&quot;), fill=colors)
+</code></pre>
 
-<p>Six additional columns were removed since they didn&#39;t appear to be measurement type variables (X, user_name, new_window, raw_timestamp_part_1, raw_timestamp_part_2 and cvtd_timestamp.  Presuming the test data came from the same population of the training data, the same transformations were performed along with the removal of the six additional columns.  </p>
-
-<p>In both cases the columns were the same except for the last one column.  The training data last column was &quot;classe&quot; and the testing data last column was &quot;problem_id&quot;.  We changed it to be &quot;classe&quot; too so randomForest would be able to be run on the training data. </p>
-
-<p>Once the data was cleansed of the &quot;NA&quot; values, the training data set was divided into a smaller training set (80% randomly chosen rows) and into a new testing data set using the remaining rows from the original training set.</p>
+<p><img src="assets/fig/pie-chart.png" title="plot of chunk pie-chart" alt="plot of chunk pie-chart" style="display: block; margin: auto;" /></p>
 
   </article>
   <!-- Presenter Notes -->
@@ -105,84 +120,21 @@ The data was downloaded from the Coursera Class &quot;Practical Machine Learning
 
 <slide class="" id="slide-4" style="background:;">
   <hgroup>
-    <h3>Statistical Modeling</h3>
+    <h2>In Summary</h2>
   </hgroup>
   <article data-timings="">
-    <p>Based on our exploratory analysis, we used the Random Forest method for Classification and Regression to create a model for our data.  We initially used the 80% training data in our randomForest model, but it was taking a very long time. </p>
+    <p>The data is currently available for the full month of May, and partial months of April and June, 2014.</p>
 
-<ul>
-<li>modFit &lt;- randomForest(training$classe ~.,data = training)</li>
-</ul>
+<p>If an invalid Range is specified, the following message will be displayed:
+&quot;Warning: No Data Found for the above Dates&quot;</p>
 
-<p>So after 30 minutes, we cancelled the randomForest execution and reran it again but using the smaller 20% testing data set. </p>
+<p>This Shiny application provides only an overview of all of the Stoplights&#39; data.</p>
 
-<ul>
-<li>modFit &lt;- randomForest(testing$classe ~.,data = testing)</li>
-</ul>
+<p>More applcations hopefully will be developped to investigate the Stoplights data by Client and by Category.</p>
 
-<p>It finished in about 15 minutes.
-Since a remote server machine was available we again ran the randomForest execution using the original 80% training data set we tried the first and it was able to finish after an hour and a half.</p>
+<p>Try the Shiny application changing from the default dates to your choice and click on the &quot;Submit&quot; button afterwards.</p>
 
-  </article>
-  <!-- Presenter Notes -->
-</slide>
-
-<slide class="" id="slide-5" style="background:;">
-  <hgroup>
-    <h3>Results</h3>
-  </hgroup>
-  <article data-timings="">
-    <p>Our randomForest model using the testing data which comprised of 20% of the original training data had an OOB of 1.31%. </p>
-
-<p>Our randomForest model using the training data which comprised of 80% of the original training data had an OOB of 0.21%.  </p>
-
-<p>Plots for varImpPlot for both 20% testing and 80% training were run against both models (see Figure 1 and Figure 2) which had similar orderings but not quite exactly the same results. </p>
-
-<p>If you don&#39;t see the images:</p>
-
-<p>Please see figure at <a href="https://github.com/bwenzel/testDeck/blob/gh-pages/plot1.jpg">https://github.com/bwenzel/testDeck/blob/gh-pages/plot1.jpg</a></p>
-
-<p>Please see figure at <a href="https://github.com/bwenzel/testDeck/blob/gh-pages/plot2.jpg">https://github.com/bwenzel/testDeck/blob/gh-pages/plot2.jpg</a></p>
-
-<p>Using the predict function on both of the models above, both yielded the same results. The output from the table function on both randomForest predicts results, are in the next section.</p>
-
-<ul>
-<li>pred=predict(modFit,real_testing);</li>
-<li>table(pred,real_testing$classe)</li>
-</ul>
-
-  </article>
-  <!-- Presenter Notes -->
-</slide>
-
-<slide class="" id="slide-6" style="background:;">
-  <hgroup>
-    <h3>Conclusions</h3>
-  </hgroup>
-  <article data-timings="">
-    <p>Our analysis on both randomForest models produced the same following prediction table: </p>
-
-<p>If you don&#39;t see the  image</p>
-
-<p>Please see figure at <a href="https://github.com/bwenzel/testDeck/blob/gh-pages/plot3.jpg">https://github.com/bwenzel/testDeck/blob/gh-pages/plot3.jpg</a></p>
-
-<p>This table was to predict the 20 different test cases, correctly.</p>
-
-<p>In conclusion we were able to acurrately predict the correct Class of Excerices each Participant did by finding a Random Forest model with our desireed target of an OOB of 5% or less.     </p>
-
-  </article>
-  <!-- Presenter Notes -->
-</slide>
-
-<slide class="" id="slide-7" style="background:;">
-  <hgroup>
-    <h3>References</h3>
-  </hgroup>
-  <article data-timings="">
-    <ol>
-<li> Human Activity Recognition, <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a>. </li>
-<li> Coursera Class &quot;Practical Machine Learning&quot;, <a href="https://class.coursera.org/predmachlearn-002/human_grading/view/courses/972090/assessments/4/submissions">https://class.coursera.org/predmachlearn-002/human_grading/view/courses/972090/assessments/4/submissions</a></li>
-</ol>
+<h2>See the Results and Enjoy!</h2>
 
   </article>
   <!-- Presenter Notes -->
@@ -194,44 +146,26 @@ Since a remote server machine was available we again ran the randomForest execut
     <ul>
       <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=1 title='Predicting a Participant&#39;s Exercise Manner'>
+        data-slide=1 title='Summary of Clients&#39; Stoplights'>
          1
       </a>
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=2 title=''>
+        data-slide=2 title='A Pie Chart'>
          2
       </a>
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=3 title='Exploratory Analysis'>
+        data-slide=3 title='A Pie Chart Continued'>
          3
       </a>
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=4 title='Statistical Modeling'>
+        data-slide=4 title='In Summary'>
          4
-      </a>
-    </li>
-    <li>
-      <a href="#" target="_self" rel='tooltip' 
-        data-slide=5 title='Results'>
-         5
-      </a>
-    </li>
-    <li>
-      <a href="#" target="_self" rel='tooltip' 
-        data-slide=6 title='Conclusions'>
-         6
-      </a>
-    </li>
-    <li>
-      <a href="#" target="_self" rel='tooltip' 
-        data-slide=7 title='References'>
-         7
       </a>
     </li>
   </ul>
